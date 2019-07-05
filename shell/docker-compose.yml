@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  server:
+    image: ashenm/shell
+    hostname: shell.ashenm.ml
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
+    deploy:
+      restart_policy:
+        condition: on-failure
+    networks:
+      httpd:
+        aliases:
+          - shell.service.ashenm.ml
+    secrets:
+      - source: credentials
+        mode: 0400
+
+networks:
+  httpd:
+    external: true
+
+secrets:
+  credentials:
+    file: ./credentials
