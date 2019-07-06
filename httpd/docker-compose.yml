@@ -1,0 +1,59 @@
+version: "3.7"
+
+services:
+  server:
+    image: httpd
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+    deploy:
+      restart_policy:
+        condition: on-failure
+    networks:
+      httpd:
+        aliases:
+          - httpd.service.ashenm.ml
+    configs:
+      - source: httpd
+        target: /usr/local/apache2/conf/httpd.conf
+      - source: htdocs
+        target: /usr/local/apache2/htdocs/index.html
+      - source: 000-default.conf
+        target: /usr/local/apache2/conf/vhosts/000-default.conf
+      - source: ml.ashenm.shell.conf
+        target: /usr/local/apache2/conf/vhosts/ml.ashenm.shell.conf
+      - source: cloudflare.pem
+        target: /usr/local/apache2/data/cacerts/cloudflare.pem
+      - source: ml.ashenm.pem
+        target: /usr/local/apache2/data/certs/ml.ashenm.pem
+    secrets:
+      - source: ml.ashenm.key
+        mode: 0400
+
+configs:
+  httpd:
+    file: ./filesystem/conf/httpd.conf
+  htdocs:
+    file: ./filesystem/htdocs/index.html
+  000-default.conf:
+    file: ./filesystem/conf/vhosts/000-default.conf
+  ml.ashenm.shell.conf:
+    file: ./filesystem/conf/vhosts/ml.ashenm.shell.conf
+  cloudflare.pem:
+    file: ./filesystem/data/cacerts/cloudflare.pem
+  ml.ashenm.pem:
+    file: ./filesystem/data/certs/ml.ashenm.pem
+
+networks:
+  httpd:
+    external: true
+
+secrets:
+  ml.ashenm.key:
+    file: ./filesystem/data/private/ml.ashenm.key
